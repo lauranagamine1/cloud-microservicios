@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { jwtDecode } from "jwt-decode";
 
 function PerfilUsuario() {
     const [usuario, setUsuario] = useState(null);
     const [error, setError] = useState(null);
 
-    // Aqui fijas el ID de usuario por ahora
-    const idUsuario = 2; // ⚡ luego lo haremos dinámico (por ejemplo después de loguearse)
-
     useEffect(() => {
         async function fetchUsuario() {
             try {
-                const respuesta = await fetch(`http://localhost:8000/users/${idUsuario}`);
+                const token = localStorage.getItem("access_token");
+                if (!token) {
+                    setError("No estas logueado.");
+                    return;
+                }
+
+                const decoded = jwtDecode(token);
+                const idUsuario = decoded.id;
+
+                const respuesta = await fetch(`http://localhost:8000/users/${idUsuario}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 if (respuesta.ok) {
                     const data = await respuesta.json();
                     setUsuario(data);

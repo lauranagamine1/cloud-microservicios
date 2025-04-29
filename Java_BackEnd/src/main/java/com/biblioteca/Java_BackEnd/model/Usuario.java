@@ -16,6 +16,8 @@ public class Usuario {
     @Column(unique = true)
     private String email;
 
+    private String password;
+
     private String telefono;
 
     private String direccion;
@@ -59,6 +61,14 @@ public class Usuario {
 
     public String getTelefono() {
         return telefono;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setTelefono(String telefono) {

@@ -41,7 +41,10 @@ public class UsuarioController {
                     usuario.setNombre(usuarioActualizado.getNombre());
                     usuario.setEmail(usuarioActualizado.getEmail());
                     usuario.setTelefono(usuarioActualizado.getTelefono());
+                    usuario.setPassword(usuarioActualizado.getPassword());
                     usuario.setDireccion(usuarioActualizado.getDireccion());
+                    usuario.setDistrito(usuarioActualizado.getDistrito());
+                    usuario.setDepartamento(usuarioActualizado.getDepartamento());
                     usuario.setEstado(usuarioActualizado.isEstado());
                     return usuarioRepository.save(usuario);
                 })
@@ -53,5 +56,10 @@ public class UsuarioController {
     public String eliminarUsuario(@PathVariable Long id) {
         usuarioRepository.deleteById(id);
         return "Usuario eliminado exitosamente.";
+    }
+
+    @GetMapping("/buscar_por_email/{email}")
+    public Usuario obtenerUsuarioPorEmail(@PathVariable String email) {
+        return usuarioRepository.findByEmail(email);
     }
 }

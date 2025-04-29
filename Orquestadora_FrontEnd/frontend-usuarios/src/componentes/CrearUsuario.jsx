@@ -4,6 +4,7 @@ function CrearUsuario() {
     const [usuario, setUsuario] = useState({
         nombre: '',
         email: '',
+        password: '',
         telefono: '',
         direccion: '',
         distrito: '',
@@ -21,8 +22,22 @@ function CrearUsuario() {
         }));
     };
 
+    // Validar la contraseña antes de enviar
+    const validarPassword = (password) => {
+        const tieneMayuscula = /[A-Z]/.test(password);
+        const tieneNumero = /[0-9]/.test(password);
+        const longitudValida = password.length >= 6;
+        return tieneMayuscula && tieneNumero && longitudValida;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validarPassword(usuario.password)) {
+            setMensaje('La contraseña debe tener al menos 6 caracteres, una letra mayúscula y un número.');
+            return;
+        }
+
         try {
             const respuesta = await fetch('http://localhost:8000/users/', {
                 method: 'POST',
@@ -38,6 +53,7 @@ function CrearUsuario() {
                 setUsuario({
                     nombre: '',
                     email: '',
+                    password: '',
                     telefono: '',
                     direccion: '',
                     distrito: '',
@@ -66,6 +82,11 @@ function CrearUsuario() {
                 <div className="mb-3">
                     <label className="form-label">Email</label>
                     <input type="email" className="form-control" id="email" value={usuario.email} onChange={handleChange} required />
+                </div>
+
+                <div className="mb-3">
+                    <label className="form-label">Contraseña</label>
+                    <input type="password" className="form-control" id="password" value={usuario.password} onChange={handleChange} required />
                 </div>
 
                 <div className="mb-3">
