@@ -1,7 +1,7 @@
 # cloud-microservicios
 # 📚 Sistema de Gestión de Usuarios
 
-Proyecto de microservicios usando Spring Boot, FastAPI y React para la gestión de usuarios en un sistema de bibliotecas.
+Proyecto de microservicios usando Spring Boot, FastAPI, Express y React para la gestión de usuarios en un sistema de bibliotecas.
 
 ---
 
