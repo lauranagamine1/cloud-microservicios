@@ -21,7 +21,9 @@ class loansController{
 
     async getOne(req, res){
         try{
-            res.status(201).json({status: 'getOne-ok'});
+            const {id} = req.params;
+            const data = await loansModel.getOne(id);
+            res.status(201).json(data);
         }catch(e){
             res.status(500).send(e);
         }}
