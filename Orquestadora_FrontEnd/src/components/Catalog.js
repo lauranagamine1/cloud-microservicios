@@ -1,17 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function Catalog() {
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
-
-  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+  const user = token ? jwtDecode(token) : null;
+  const userId = user?.id;
+  const rol = user?.rol;
+  console.log('Usuario decodificado desde JWT:', user);
 
   const fetchBooks = async (q = '') => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/search?q=${q}`);
-      setBooks(res.data);
+      const res = await axios.get(`http://localhost:8000/libros/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      let filtered = res.data;
+      if (q) {
+        filtered = filtered.filter(book =>
+          book.title.toLowerCase().includes(q.toLowerCase()) ||
+          book.author.name.toLowerCase().includes(q.toLowerCase())
+        );
+      }
+
+      // Si es usuario normal, mostrar solo libros disponibles
+      if (rol !== 'admin') {
+        filtered = filtered.filter(book => book.quantity > 0);
+      }
+
+      setBooks(filtered);
     } catch (err) {
       console.error('Error al obtener libros', err);
     } finally {
@@ -30,23 +50,33 @@ function Catalog() {
 
   const handleBorrow = async (bookId) => {
     try {
-      const res = await axios.post('http://localhost:3001/api/borrow', {
-        user_id: user.id,
+      await axios.post('http://localhost:8000/prestamos/rentar', {
+        user_id: String(userId),
         book_id: bookId,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       alert('Préstamo solicitado con éxito');
       fetchBooks(query);
     } catch (err) {
       console.error(err);
-      alert('Error al solicitar préstamo');
+      alert(err.response?.data?.detail || 'Error al solicitar préstamo');
     }
   };
 
   return (
     <div className="container mt-5">
       <h2>Catálogo de Libros</h2>
-      <p>Bienvenido, {user?.name || 'Usuario'}</p>
+      <div className="mb-3">
+      <button className="btn btn-outline-primary me-2" onClick={() => window.location.href = '/perfil'}>
+        Ir a Mi Perfil
+      </button>
+      <button className="btn btn-outline-secondary" onClick={() => window.location.href = '/loans'}>
+        Ver Mis Préstamos
+      </button>
+        </div>
+      <p>Bienvenido, {user?.sub || 'Usuario'}</p>
 
       <form onSubmit={handleSearch} className="mb-4">
         <div className="input-group">
@@ -70,11 +100,17 @@ function Catalog() {
               <div className="card h-100">
                 <div className="card-body">
                   <h5 className="card-title">{book.title}</h5>
-                  <h6 className="card-subtitle mb-2 text-muted">{book.author}</h6>
+                  <h6 className="card-subtitle mb-2 text-muted">Autor: {book.author.name}</h6>
                   <p className="card-text">Cantidad disponible: {book.quantity}</p>
-                  <button className="btn btn-primary mt-2" onClick={() => handleBorrow(book.id)}>
-                    Pedir préstamo
-                  </button>
+                  {rol === 'admin' ? null : (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleBorrow(book.id)}
+                      disabled={book.quantity <= 0}
+                    >
+                      Pedir préstamo
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -82,6 +118,7 @@ function Catalog() {
         </div>
       )}
     </div>
+    
   );
 }
 

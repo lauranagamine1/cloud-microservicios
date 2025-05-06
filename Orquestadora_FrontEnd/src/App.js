@@ -1,47 +1,46 @@
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
 
 import Login from './components/Login';
 import Register from './components/Register';
 import Catalog from './components/Catalog';
 import MyLoans from './components/MyLoans';
 import PerfilUsuario from './components/PerfilUsuario';
-
-function ProtectedRoute({ children }) {
-  const user = localStorage.getItem('user');
-  return user ? children : <Navigate to="/login" />;
-}
+import PrivateRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         <Route
           path="/catalog"
           element={
-            <ProtectedRoute>
+            <PrivateRoute>
               <Catalog />
-            </ProtectedRoute>
+            </PrivateRoute>
           }
         />
         <Route
           path="/loans"
           element={
-            <ProtectedRoute>
+            <PrivateRoute>
               <MyLoans />
-            </ProtectedRoute>
+            </PrivateRoute>
           }
         />
         <Route
           path="/perfil"
           element={
-            <ProtectedRoute>
+            <PrivateRoute>
               <PerfilUsuario />
-            </ProtectedRoute>
+            </PrivateRoute>
           }
         />
       </Routes>
