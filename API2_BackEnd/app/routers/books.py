@@ -47,3 +47,29 @@ def delete_book(book_id: int, db: Session = Depends(get_db)):
 @router.get("/search", response_model=List[schemas.Book])
 def search_books(q: str, db: Session = Depends(get_db)):
     return crud.search_books(db, q)
+
+@router.get("/available", response_model=List[schemas.Book])
+def get_available_books(db: Session = Depends(get_db)):
+    books = crud.get_available_books(db)
+    if not books:
+        raise HTTPException(status_code=404, detail="No hay libros disponibles")
+    return books
+
+@router.put("/return/{book_id}", response_model=schemas.Book)
+def return_book(book_id: int, db: Session = Depends(get_db)):
+    returned = crud.return_book(db, book_id)
+    if not returned:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    return returned
+
+@router.put("/rent/{book_id}")
+def rent_book(book_id: int, db: Session = Depends(get_db)):
+    book = crud.get_book(db, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    if book.quantity <= 0:
+        raise HTTPException(status_code=400, detail="No hay stock disponible")
+    book.quantity -= 1
+    db.commit()
+    db.refresh(book)
+    return book

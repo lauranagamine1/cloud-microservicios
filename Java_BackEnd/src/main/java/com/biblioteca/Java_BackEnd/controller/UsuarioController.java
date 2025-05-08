@@ -38,14 +38,27 @@ public class UsuarioController {
     public Usuario actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioActualizado) {
         return usuarioRepository.findById(id)
                 .map(usuario -> {
-                    usuario.setNombre(usuarioActualizado.getNombre());
-                    usuario.setEmail(usuarioActualizado.getEmail());
-                    usuario.setTelefono(usuarioActualizado.getTelefono());
-                    usuario.setPassword(usuarioActualizado.getPassword());
-                    usuario.setDireccion(usuarioActualizado.getDireccion());
-                    usuario.setDistrito(usuarioActualizado.getDistrito());
-                    usuario.setDepartamento(usuarioActualizado.getDepartamento());
-                    usuario.setEstado(usuarioActualizado.isEstado());
+                    // Solo actualizamos los campos que no son null
+                    if (usuarioActualizado.getNombre() != null) {
+                        usuario.setNombre(usuarioActualizado.getNombre());
+                    }
+                    if (usuarioActualizado.getTelefono() != null) {
+                        usuario.setTelefono(usuarioActualizado.getTelefono());
+                    }
+                    if (usuarioActualizado.getDireccion() != null) {
+                        usuario.setDireccion(usuarioActualizado.getDireccion());
+                    }
+                    if (usuarioActualizado.getDistrito() != null) {
+                        usuario.setDistrito(usuarioActualizado.getDistrito());
+                    }
+                    if (usuarioActualizado.getDepartamento() != null) {
+                        usuario.setDepartamento(usuarioActualizado.getDepartamento());
+                    }
+                    if (usuarioActualizado.getRol() != null) {
+                        usuario.setRol(usuarioActualizado.getRol());
+                    }
+
+                    // NO actualizar email, password, rol ni fechaRegistro
                     return usuarioRepository.save(usuario);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
@@ -58,6 +71,7 @@ public class UsuarioController {
         return "Usuario eliminado exitosamente.";
     }
 
+    // GET /users/buscar_por_email/{email} → Buscar por email
     @GetMapping("/buscar_por_email/{email}")
     public Usuario obtenerUsuarioPorEmail(@PathVariable String email) {
         return usuarioRepository.findByEmail(email);

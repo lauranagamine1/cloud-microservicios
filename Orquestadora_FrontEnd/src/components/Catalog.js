@@ -26,6 +26,7 @@ function Catalog() {
         );
       }
 
+      // Si es usuario normal, mostrar solo libros disponibles
       if (rol !== 'admin') {
         filtered = filtered.filter(book => book.quantity > 0);
       }
@@ -65,11 +66,8 @@ function Catalog() {
   };
 
   return (
-    <div className="container py-5">
-      <div className="d-flex align-items-center mb-4">
-        <img src="/logo.png" alt="Logo" style={{ height: '50px', marginRight: '15px' }} />
-        <h2 className="text-primary">Catálogo de Libros</h2>
-      </div>
+    <div className="container mt-5">
+      <h2>Catálogo de Libros</h2>
       <div className="mb-3">
       <button className="btn btn-outline-primary me-2" onClick={() => window.location.href = '/perfil'}>
         Ir a Mi Perfil

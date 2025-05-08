@@ -12,6 +12,7 @@ public class Usuario {
     private Long id;
 
     private String nombre;
+    private String rol = "user"; // valor por defecto
 
     @Column(unique = true)
     private String email;
@@ -27,7 +28,7 @@ public class Usuario {
 
     private LocalDateTime fechaRegistro;
 
-    private boolean estado = true; // activo por defecto
+    private Boolean estado = true; // activo por defecto
 
     public Usuario() {
         this.fechaRegistro = LocalDateTime.now();
@@ -51,6 +52,14 @@ public class Usuario {
         this.nombre = nombre;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -63,16 +72,16 @@ public class Usuario {
         return telefono;
     }
 
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
     }
 
     public String getDireccion() {
@@ -107,11 +116,11 @@ public class Usuario {
         this.fechaRegistro = fechaRegistro;
     }
 
-    public boolean isEstado() {
+    public Boolean getEstado() {
         return estado;
     }
 
-    public void setEstado(boolean estado) {
+    public void setEstado(Boolean estado) {
         this.estado = estado;
     }
 }

@@ -67,3 +67,14 @@ def delete_book(db: Session, book_id: int):
         db.delete(db_book)
         db.commit()
     return db_book
+
+def get_available_books(db: Session) -> List[models.Book]:
+    return db.query(models.Book).filter(models.Book.quantity > 0).all()
+def return_book(db: Session, book_id: int):
+    db_book = get_book(db, book_id)
+    if not db_book:
+        return None
+    db_book.quantity += 1
+    db.commit()
+    db.refresh(db_book)
+    return db_book

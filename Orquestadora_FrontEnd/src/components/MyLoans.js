@@ -36,7 +36,7 @@ function MyLoans() {
         }
       });
       alert('Libro devuelto correctamente');
-      fetchLoans();
+      fetchLoans(); // Refresca los préstamos
     } catch (err) {
       console.error(err);
       alert('No se pudo devolver el libro');

@@ -1,93 +1,160 @@
-# cloud-microservicios
-# 📚 Sistema de Gestión de Usuarios
 
-Proyecto de microservicios usando Spring Boot, FastAPI, Express y React para la gestión de usuarios en un sistema de bibliotecas.
+# 📚 Sistema de Gestión de Bibliotecas - Arquitectura de Microservicios
+
+Este proyecto implementa un sistema de gestión de bibliotecas con arquitectura de microservicios. Utiliza **Java Spring Boot**, **FastAPI**, **Node.js** y un **frontend en React** para ofrecer un sistema robusto, seguro y escalable.
+
+---
+
+## 🏗 Arquitectura General
+
+```plaintext
+[ React Frontend (localhost:3000) ]
+        ↓ (Axios / fetch)
+[ API Orquestadora (FastAPI - localhost:8000) ]
+        ↓ (requests)
+ ┌──────────────────────┬─────────────────────┬──────────────────────┐
+ │ Microservicio Java   │ Microservicio Libros│ Microservicio Prést. │
+ │ Spring Boot + MySQL  │ FastAPI + PostgreSQL│ Node.js + MongoDB    │
+ └──────────────────────┴─────────────────────┴──────────────────────┘
+```
 
 ---
 
 ## 🚀 Tecnologías utilizadas
 
-### 🖥️ Microservicio de Usuarios (Backend Java - Spring Boot)
+### 🧩 Microservicio de Usuarios (Java - Spring Boot)
 
 - **Lenguaje:** Java
 - **Framework:** Spring Boot
 - **Base de datos:** MySQL
 - **ORM:** Spring Data JPA
-- **Servidor embebido:** Tomcat
-- **Dependencias clave:** Spring Web, Spring Data JPA, MySQL Driver
-- **Características nuevas:**
-  - Campo `email` único a nivel de base de datos (`@Column(unique = true)`).
-  - Nuevo endpoint `GET /users/buscar_por_email/{email}` para búsqueda por email.
-  - Validación automática de unicidad de correo electrónico.
-  - Contraseñas almacenadas en forma de hash en la base de datos (bcrypt).
+- **Servidor:** Tomcat embebido
+- **Hash de contraseñas:** bcrypt
+- **Validaciones:**
+  - `email` único
+  - Password encriptada
 
-**Endpoints expuestos:**
+**Endpoints:**
 
-| Método | Ruta | Descripción |
-|:------:|:----:|:-----------:|
-| `POST` | `/users` | Crear un nuevo usuario |
-| `GET` | `/users/{id}` | Obtener información de un usuario por ID |
-| `GET` | `/users/buscar_por_email/{email}` | Buscar usuario por email |
-| `GET` | `/users/{id}/loans` | Ver préstamos de un usuario (futuro) |
-| `PUT` | `/users/{id}` | Actualizar datos de un usuario |
-| `DELETE` | `/users/{id}` | Eliminar un usuario |
-| `GET` | `/users` | Listar todos los usuarios (solo para admin en el futuro) |
+| Método | Ruta                          | Descripción                          |
+|--------|-------------------------------|--------------------------------------|
+| POST   | `/users`                      | Crear usuario                        |
+| GET    | `/users/{id}`                 | Obtener usuario por ID               |
+| PUT    | `/users/{id}`                 | Actualizar datos personales          |
+| DELETE | `/users/{id}`                 | Eliminar usuario                     |
+| GET    | `/users`                      | Listar usuarios (para admin)         |
+| GET    | `/users/buscar_por_email/{e}` | Buscar por email                     |
 
 ---
 
-### 🐍 Orquestadora API (Backend Python - FastAPI)
+### 📘 Microservicio de Libros (Python - FastAPI)
 
 - **Lenguaje:** Python
 - **Framework:** FastAPI
-- **Servidor web:** Uvicorn
-- **Cliente HTTP:** Requests
-- **Middleware:** CORS Middleware
-- **Librerías de seguridad:** bcrypt (encriptar contraseñas), PyJWT (manejo de tokens JWT)
-- **Manejo de autenticación:**
-  - Validación de contraseñas seguras:
-    - Mínimo 6 caracteres.
-    - Al menos una letra mayúscula.
-    - Al menos un número.
-  - Login de usuarios y generación de tokens JWT.
-  - Verificación de tokens JWT para proteger rutas.
+- **Base de datos:** PostgreSQL
+- **ORM:** SQLAlchemy
+- **Endpoints:**
 
-**Endpoints orquestados:**
-
-| Método | Ruta | Descripción |
-|:------:|:----:|:-----------:|
-| `POST` | `/users/` | Crear usuario (orquesta hacia microservicio Java) |
-| `GET`  | `/users/{id}` | Obtener usuario por ID (orquesta hacia microservicio Java) |
-| `POST` | `/users/login` | Login de usuario y generación de token JWT |
-| `GET`  | `/users/protected` | Ruta protegida accesible solo con token válido |
+| Método | Ruta                    | Descripción                         |
+|--------|-------------------------|-------------------------------------|
+| GET    | `/books`                | Listar todos los libros             |
+| GET    | `/books/{id}`           | Ver detalle de libro                |
+| PUT    | `/books/rent/{id}`      | Reducir stock por préstamo          |
+| PUT    | `/books/return/{id}`    | Aumentar stock al devolver libro    |
 
 ---
 
-### 🌐 Frontend (React + Bootstrap)
+### 📚 Microservicio de Préstamos (Node.js + Express)
 
-- **Framework:** React
-- **Estilos:** Bootstrap 5
-- **Manejo de estado:** React Hooks (useState, useEffect)
-- **Peticiones HTTP:** fetch API
-- **Almacenamiento local:** localStorage
-- **Librerías adicionales:** jwt-decode (para leer datos del token JWT)
+- **Lenguaje:** JavaScript
+- **Framework:** Express.js
+- **Base de datos:** MongoDB
+- **Endpoints:**
+
+| Método | Ruta                          | Descripción                              |
+|--------|-------------------------------|------------------------------------------|
+| POST   | `/loans`                      | Registrar nuevo préstamo                 |
+| GET    | `/loans/{id}`                 | Obtener préstamo por ID                  |
+| GET    | `/loans/user/{user_id}`       | Obtener préstamos de un usuario          |
+| GET    | `/loans/user/{user_id}/active`| Ver solo préstamos activos               |
+| PUT    | `/loans/{id}`                 | Cambiar estado del préstamo (`returned`) |
+
+---
+
+### 🧠 API Orquestadora (FastAPI)
+
+- **Lenguaje:** Python
+- **Framework:** FastAPI
+- **Librerías clave:** bcrypt, PyJWT, requests
+- **Responsabilidades:**
+  - Crear usuarios orquestando hacia Spring Boot
+  - Login con validación de contraseña y generación de JWT
+  - Rutas protegidas según rol (`admin`, `usuario`)
+  - Préstamos y devoluciones (consulta + coordinación)
+
+**Endpoints principales:**
+
+| Método | Ruta                        | Descripción                                 |
+|--------|-----------------------------|---------------------------------------------|
+| POST   | `/users/`                   | Crear usuario                               |
+| POST   | `/users/login`             | Iniciar sesión y obtener JWT                |
+| GET    | `/users/{id}`              | Obtener perfil (requiere token válido)      |
+| POST   | `/prestamos/rentar`        | Crear un préstamo                           |
+| PUT    | `/prestamos/devolver`      | Devolver un préstamo                        |
+| GET    | `/prestamos/activos/{id}`  | Ver préstamos activos del usuario           |
+| GET    | `/libros/`                 | Listar libros disponibles (con filtro por rol) |
+
+---
+
+## 💻 Frontend (React)
+
+- **Framework:** React con Bootstrap
+- **Autenticación:** JWT en `localStorage`
+- **Navegación protegida:** Rutas privadas usando `PrivateRoute`
+- **Librerías:** `axios`, `react-router-dom`, `jwt-decode`
 
 **Componentes principales:**
 
-| Componente | Funcionalidad |
-|:----------:|:-------------:|
-| `CrearUsuario.jsx` | Formulario para registrar un nuevo usuario con validación de contraseña segura |
-| `Login.jsx` | Formulario para iniciar sesión y guardar el token JWT |
-| `PerfilUsuario.jsx` | Visualizar datos del usuario actualmente logueado utilizando el token JWT |
+| Componente         | Función                                   |
+|--------------------|--------------------------------------------|
+| `Register`         | Registro de nuevos usuarios                |
+| `Login`            | Inicio de sesión                           |
+| `Catalog`          | Búsqueda de libros, ver stock, pedir préstamo |
+| `PerfilUsuario`    | Mostrar datos personales + préstamos activos |
+| `MyLoans`          | Historial de préstamos y devoluciones       |
+| `Navbar`           | Navegación + cerrar sesión                  |
 
 ---
 
-## 🛠 Flujo de Arquitectura
+## ✅ Requisitos de Contraseña
 
-```plaintext
-[ React Frontend (localhost:5173) ]
-        ↓ (fetch)
-[ API Orquestadora FastAPI (localhost:8000/users/) ]
-        ↓ (requests)
-[ Microservicio Java Spring Boot (localhost:8080/users) ]
-        ↓
-[ Base de datos MySQL ]
+- Al menos 6 caracteres
+- Una letra mayúscula
+- Un número
+
+---
+
+## 🔒 Seguridad
+
+- Contraseñas hasheadas con bcrypt
+- Verificación de roles en la orquestadora para restringir acceso
+- JWT firmado con secreto (`HS256`)
+
+---
+
+## 📂 Estructura de Carpetas
+
+```
+project-root/
+│
+├── orquestadora/               # API FastAPI (central)
+├── usuarios_java/              # Spring Boot (Java)
+├── libros_fastapi/             # Microservicio libros (Python)
+├── prestamos_node/             # Microservicio préstamos (Node.js)
+├── orquestadora_frontend/      # React App
+└── README.md
+```
+
+---
+
+

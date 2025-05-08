@@ -16,7 +16,7 @@ function Login() {
     try {
       const response = await axios.post('http://localhost:8000/users/login', form);
       localStorage.setItem('token', response.data.access_token);
-      navigate('/catalog');
+      navigate('/catalog'); // o la página que desees
     } catch (err) {
       setError('Email o contraseña incorrectos');
     }
