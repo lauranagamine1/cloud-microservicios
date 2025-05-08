@@ -1,28 +1,57 @@
-import { Link } from 'react-router-dom';
+// src/components/Navbar.js
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import '../App.css';
+import logo from '../logo.png';
 
 function Navbar() {
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  let user = null;
+
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      user = decoded.sub;
+    } catch (e) {
+      console.error("Token inválido");
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div className="container">
-        <Link className="navbar-brand" to="/">BookLoan</Link>
-        <div className="collapse navbar-collapse">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item"><Link className="nav-link" to="/">Inicio</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/register">Registro</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/catalog">Catálogo</Link></li>
-            <li className="nav-item"><Link to="/perfil" className="nav-link">Mi Perfil</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/my-loans">Mis Préstamos</Link></li>
-          </ul>
-          <span className="navbar-text me-3">
-            {user?.name}
-          </span>
-          <button className="btn btn-outline-danger" onClick={handleLogout}>
-            Cerrar sesión
-          </button>
-        </div>
+    <nav className="navbar-custom">
+      <div className="navbar-left">
+        <img src={logo} alt="EasyBooks logo" className="navbar-logo" />
+        <h3 className="navbar-title">EasyBooks</h3>
       </div>
+      <div className="navbar-links">
+        {!token && (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Registro</Link>
+          </>
+        )}
+        {token && (
+          <>
+            <Link to="/catalog">Catálogo</Link>
+            <Link to="/perfil">Mi Perfil</Link>
+            <Link to="/loans">Mis Préstamos</Link>
+            <button className="logout-btn" onClick={handleLogout}>Salir</button>
+          </>
+        )}
+      </div>
+      {user && <span className="navbar-welcome">Bienvenido, {user}</span>}
     </nav>
   );
 }
 
 export default Navbar;
+

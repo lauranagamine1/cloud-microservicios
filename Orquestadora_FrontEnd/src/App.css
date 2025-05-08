@@ -1,38 +1,96 @@
-.App {
-  text-align: center;
+:root {
+  --primary-color: #A0522D;
+  --secondary-color: #FFDAB9;
+  --accent-color: #8B4513;
+  --bg-color: #FFF8F0;
+  --text-color: #333;
+  --font-family: 'Segoe UI', sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+h1, h2, h3, h4 {
+  color: var(--primary-color);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+button {
+  background-color: var(--primary-color);
+  border: none;
   color: white;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: var(--accent-color);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.card {
+  background-color: white;
+  border: 1px solid var(--secondary-color);
+  border-radius: 10px;
+  padding: 1em;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+input, select, textarea {
+  border: 1px solid var(--secondary-color);
+  border-radius: 4px;
+  padding: 0.5em;
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.navbar-custom {
+  background-color: var(--secondary-color);
+  padding: 1em 2em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-primary);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  height: 50px;
+  margin-right: 1em;
+}
+
+.navbar-title {
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.navbar-links a,
+.logout-btn {
+  margin: 0 0.5em;
+  color: var(--text-color);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.navbar-links a:hover,
+.logout-btn:hover {
+  color: var(--accent-color);
+}
+
+.navbar-welcome {
+  margin-left: 1em;
+  font-weight: bold;
+  color: var(--text-color);
 }

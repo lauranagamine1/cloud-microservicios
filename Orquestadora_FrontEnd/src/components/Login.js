@@ -1,21 +1,24 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Login() {
-  const [userId, setUserId] = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get(`http://localhost:3001/users/${userId}`);
-      localStorage.setItem('user', JSON.stringify(response.data));
-      navigate('/catalog'); 
+      const response = await axios.post('http://localhost:8000/users/login', form);
+      localStorage.setItem('token', response.data.access_token);
+      navigate('/catalog');
     } catch (err) {
-      setError('Usuario no encontrado');
+      setError('Email o contraseña incorrectos');
     }
   };
 
@@ -24,20 +27,34 @@ function Login() {
       <h2>Iniciar Sesión</h2>
       <form onSubmit={handleLogin}>
         <div className="mb-3">
-          <label htmlFor="userId" className="form-label">ID de Usuario</label>
+          <label className="form-label">Correo Electrónico</label>
           <input
-            type="text"
+            type="email"
+            name="email"
             className="form-control"
-            id="userId"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            value={form.email}
+            onChange={handleChange}
             required
           />
         </div>
+
+        <div className="mb-3">
+          <label className="form-label">Contraseña</label>
+          <input
+            type="password"
+            name="password"
+            className="form-control"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
         {error && <div className="alert alert-danger">{error}</div>}
+
         <button type="submit" className="btn btn-primary">Entrar</button>
         <p className="mt-3">
-          ¿No tienes cuenta? <a href="/register">Registrate acá</a>
+          ¿No tienes cuenta? <a href="/register">Regístrate acá</a>
         </p>
       </form>
     </div>
