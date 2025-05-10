@@ -14,7 +14,7 @@ function PerfilUsuario() {
 
   const fetchPerfil = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/users/${user.id}`, {
+      const res = await axios.get(`http://orquestadora-alb-1826496426.us-east-1.elb.amazonaws.com/users/${user.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPerfil(res.data);
@@ -25,7 +25,7 @@ function PerfilUsuario() {
 
   const fetchPrestamos = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/prestamos/activos/${user.id}`, {
+      const res = await axios.get(`http://orquestadora-alb-1826496426.us-east-1.elb.amazonaws.com/prestamos/activos/${user.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPrestamos(res.data);

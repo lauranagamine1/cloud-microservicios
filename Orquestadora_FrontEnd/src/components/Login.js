@@ -12,15 +12,35 @@ function Login() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:8000/users/login', form);
-      localStorage.setItem('token', response.data.access_token);
+  e.preventDefault();
+  setError(''); // limpia el error antes de intentar
+
+  try {
+    const response = await axios.post(
+      'http://orquestadora-alb-1826496426.us-east-1.elb.amazonaws.com/users/login',
+      form,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const token = response.data?.access_token;
+
+    if (token) {
+      localStorage.setItem('token', token);
       navigate('/catalog'); // o la página que desees
-    } catch (err) {
-      setError('Email o contraseña incorrectos');
+    } else {
+      setError('Error inesperado: No se recibió el token');
+      console.error('Respuesta inesperada:', response.data);
     }
-  };
+  } catch (err) {
+    console.error('Error al intentar iniciar sesión:', err);
+    setError('Email o contraseña incorrectos');
+  }
+};
+
 
   return (
     <div className="container mt-5">

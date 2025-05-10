@@ -1,8 +1,9 @@
-// config/dbClient.js
 import mongoose from "mongoose";
 
-const queryString = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@${process.env.SERVER_DB}/?retryWrites=true&w=majority&appName=Cluster0`;
-mongoose.connect(queryString);
+// NUEVO: Cadena directa al Mongo local en la VM2 (sin auth, puerto 4003)
+const MONGO_URL = 'mongodb://172.31.30.170:4003/loan';
+
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));

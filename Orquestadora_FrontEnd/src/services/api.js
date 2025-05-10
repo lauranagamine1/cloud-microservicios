@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api';
+const API = 'http://orquestadora-alb-1826496426.us-east-1.elb.amazonaws.com';
 
 export const searchBooks = async (q) => {
   const res = await fetch(`${API}/search?q=${q}`);
