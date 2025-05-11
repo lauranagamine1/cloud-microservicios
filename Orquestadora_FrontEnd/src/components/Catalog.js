@@ -1,11 +1,11 @@
 // src/components/Catalog.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 const ITEMS_PER_PAGE = 9;
 
-function Catalog() {
+export default function Catalog() {
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -19,26 +19,34 @@ function Catalog() {
   const fetchBooks = async (q = '') => {
     setLoading(true);
     try {
+      // Llamada a la orquestadora paginada si quieres backend paging,
+      // o bien aquí traes todos y paginas en frontend:
       const res = await axios.get(`http://localhost:9000/libros/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      let filtered = res.data;
+      let data = res.data.items ?? res.data; // si tu backend devuelve { items, total, ... }
+      // Si trajo items, usamos eso; si no, asumimos lista completa
+
+      // Filtrado local por búsqueda
       if (q) {
-        filtered = filtered.filter(book =>
-          book.title.toLowerCase().includes(q.toLowerCase()) ||
-          book.author.name.toLowerCase().includes(q.toLowerCase())
+        const ql = q.toLowerCase();
+        data = data.filter(book =>
+          book.title.toLowerCase().includes(ql) ||
+          book.author.name.toLowerCase().includes(ql)
         );
       }
+      // Solo disponibles para usuarios no-admin
       if (rol !== 'admin') {
-        filtered = filtered.filter(book => book.quantity > 0);
+        data = data.filter(book => book.quantity > 0);
       }
 
-      setBooks(filtered);
-      setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE));
+      setBooks(data);
+      setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));
       setPage(1);
     } catch (err) {
       console.error('Error al obtener libros', err);
+      alert('Error al cargar catálogo');
     } finally {
       setLoading(false);
     }
@@ -46,6 +54,7 @@ function Catalog() {
 
   useEffect(() => {
     fetchBooks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = e => {
@@ -68,7 +77,7 @@ function Catalog() {
     }
   };
 
-  // Paginación
+  // Paginación en cliente
   const startIndex = (page - 1) * ITEMS_PER_PAGE;
   const currentBooks = books.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
@@ -153,5 +162,3 @@ function Catalog() {
     </div>
   );
 }
-
-export default Catalog;

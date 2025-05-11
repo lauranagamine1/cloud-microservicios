@@ -68,3 +68,40 @@ def get_book(id: int, user=Depends(require_user)):
         raise
     except Exception as e:
         raise HTTPException(500, detail=str(e))
+
+@router.get("/", summary="Listar libros paginados")
+def listar_libros(
+    page: int = Query(1, ge=1, description="Número de página"),
+    size: int = Query(10, ge=1, le=100, description="Tamaño de página"),
+    search: str = Query("", description="Filtro por título o autor"),
+    user=Depends(require_user)
+):
+    try:
+        resp = requests.get("http://localhost:8000/books")
+        resp.raise_for_status()
+        todos = resp.json()
+
+        # Filtrar según disponibilidad y búsqueda
+        if user["rol"] != "admin":
+            todos = [b for b in todos if b.get("quantity", 0) > 0]
+        if search:
+            q = search.lower()
+            todos = [
+                b for b in todos
+                if q in b.get("title","").lower()
+                or q in b.get("author",{}).get("name","").lower()
+            ]
+
+        total = len(todos)
+        start = (page - 1) * size
+        end = start + size
+        page_items = todos[start:end]
+
+        return {
+            "total": total,
+            "page": page,
+            "size": size,
+            "items": page_items
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
