@@ -14,7 +14,7 @@ function Home() {
   const handleBorrow = async (bookId) => {
     const userId = localStorage.getItem('userId');
     if (!userId) return alert('Primero debes registrarte o ingresar tu ID');
-    const res = await fetch('http://localhost:3000/api/borrow', {
+    const res = await fetch('http://localhost:9000/api/borrow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, bookId })

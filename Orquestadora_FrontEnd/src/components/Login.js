@@ -1,30 +1,24 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
     try {
-      const response = await axios.post('http://localhost:8000/users/login', {
-        email,
-        password
-      });
-
+      const response = await axios.post('http://localhost:9000/users/login', form);
       localStorage.setItem('token', response.data.access_token);
-      navigate('/catalog');
+      navigate('/catalog'); // o la página que desees
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError('Email o contraseña incorrectos');
-      } else {
-        setError('Error al iniciar sesión');
-      }
+      setError('Email o contraseña incorrectos');
     }
   };
 
@@ -38,8 +32,8 @@ function Login() {
             type="email"
             name="email"
             className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={form.email}
+            onChange={handleChange}
             required
           />
         </div>
@@ -50,8 +44,8 @@ function Login() {
             type="password"
             name="password"
             className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={form.password}
+            onChange={handleChange}
             required
           />
         </div>

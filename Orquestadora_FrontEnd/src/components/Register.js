@@ -23,7 +23,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:8000/users', form);
+      const res = await axios.post('http://localhost:9000/users', form);
       navigate('/login');
     } catch (err) {
       setError('Error al registrar usuario');
