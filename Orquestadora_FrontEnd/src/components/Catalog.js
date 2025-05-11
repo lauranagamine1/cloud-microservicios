@@ -6,32 +6,19 @@ function Catalog() {
   const [books, setBooks] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
   const token = localStorage.getItem('token');
   const user = token ? jwtDecode(token) : null;
   const userId = user?.id;
   const rol = user?.rol;
-  console.log('Usuario decodificado desde JWT:', user);
 
   const fetchBooks = async (q = '') => {
+    setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:8000/libros/`, {
+      const res = await axios.get(`http://localhost:8000/libros?search=${encodeURIComponent(q)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      let filtered = res.data;
-      if (q) {
-        filtered = filtered.filter(book =>
-          book.title.toLowerCase().includes(q.toLowerCase()) ||
-          book.author.name.toLowerCase().includes(q.toLowerCase())
-        );
-      }
-
-      // Si es usuario normal, mostrar solo libros disponibles
-      if (rol !== 'admin') {
-        filtered = filtered.filter(book => book.quantity > 0);
-      }
-
-      setBooks(filtered);
+      setBooks(res.data);
     } catch (err) {
       console.error('Error al obtener libros', err);
     } finally {
@@ -70,15 +57,17 @@ function Catalog() {
       <div className="d-flex align-items-center mb-4">
         <img src="/logo.png" alt="Logo" style={{ height: '50px', marginRight: '15px' }} />
         <h2 className="text-primary">Catálogo de Libros</h2>
-  </div>
+      </div>
+
       <div className="mb-3">
-      <button className="btn btn-outline-primary me-2" onClick={() => window.location.href = '/perfil'}>
-        Ir a Mi Perfil
-      </button>
-      <button className="btn btn-outline-secondary" onClick={() => window.location.href = '/loans'}>
-        Ver Mis Préstamos
-      </button>
-        </div>
+        <button className="btn btn-outline-primary me-2" onClick={() => window.location.href = '/perfil'}>
+          Ir a Mi Perfil
+        </button>
+        <button className="btn btn-outline-secondary" onClick={() => window.location.href = '/loans'}>
+          Ver Mis Préstamos
+        </button>
+      </div>
+
       <p>Bienvenido, {user?.sub || 'Usuario'}</p>
 
       <form onSubmit={handleSearch} className="mb-4">
@@ -121,7 +110,6 @@ function Catalog() {
         </div>
       )}
     </div>
-    
   );
 }
 
