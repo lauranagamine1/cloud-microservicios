@@ -1,71 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 function MyLoans() {
   const [loans, setLoans] = useState([]);
+  const [bookTitles, setBookTitles] = useState({});
   const [loading, setLoading] = useState(true);
+  const [returningId, setReturningId] = useState(null);
   const navigate = useNavigate();
-
   const token = localStorage.getItem('token');
   const user = token ? jwtDecode(token) : null;
 
-  useEffect(() => {
-    if (!token || !user?.id) {
-      navigate('/login');
-      return;
-    }
-
-    const fetchLoans = async () => {
-      try {
-        const res = await axios.get(`http://localhost:8000/prestamos/activos/${user.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setLoans(res.data);
-      } catch (err) {
-        console.error('Error al obtener préstamos:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLoans();
-  }, [token, user, navigate]);
-
-  const handleReturn = async (loanId, bookId) => {
+  const fetchLoans = async () => {
+    setLoading(true);
     try {
-      await axios.put('http://localhost:8000/prestamos/devolver', {
-        loan_id: loanId,
-        book_id: bookId
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      // 1) Obtener préstamos activos
+      const { data: activeLoans } = await axios.get(
+        `http://localhost:9000/prestamos/activos/${user.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setLoans(activeLoans);
 
-      alert('Libro devuelto correctamente');
-      setLoading(true);
-      const res = await axios.get(`http://localhost:8000/prestamos/activos/${user.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setLoans(res.data);
+      // 2) IDs únicos
+      const uniqueBookIds = [...new Set(activeLoans.map(l => l.book_id))];
+
+      // 3) Peticiones paralelas para obtener títulos
+      const titlesMap = {};
+      await Promise.all(
+        uniqueBookIds.map(async (id) => {
+          try {
+            const { data: book } = await axios.get(
+              `http://localhost:9000/libros/${id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            titlesMap[id] = book.title;
+          } catch {
+            titlesMap[id] = id; // fallback
+          }
+        })
+      );
+      setBookTitles(titlesMap);
     } catch (err) {
-      console.error('Error al devolver libro:', err);
-      alert('No se pudo devolver el libro');
+      console.error('Error al obtener préstamos', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleReturn = async (loanId, bookId) => {
+    setReturningId(loanId);
+    try {
+      await axios.put(
+        'http://localhost:9000/prestamos/devolver',
+        { loan_id: loanId, book_id: bookId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await fetchLoans();
+    } catch (err) {
+      console.error('Error al devolver', err);
+      alert('No se pudo devolver el libro');
+    } finally {
+      setReturningId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!token || !user) {
+      navigate('/login');
+    } else {
+      fetchLoans();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="container mt-5">
       <h2>Mis Préstamos</h2>
-
       {loading ? (
         <p>Cargando...</p>
       ) : loans.length === 0 ? (
@@ -83,18 +94,19 @@ function MyLoans() {
           </thead>
           <tbody>
             {loans.map((loan) => (
-              <tr key={loan._id}>
-                <td>{loan.book_title || loan.book_id}</td>
-                <td>{loan.loan_date ? new Date(loan.loan_date).toLocaleDateString() : 'N/A'}</td>
-                <td>{loan.return_date ? new Date(loan.return_date).toLocaleDateString() : 'N/A'}</td>
+              <tr key={loan.id ?? loan._id}>
+                <td>{bookTitles[loan.book_id] || loan.book_id}</td>
+                <td>{new Date(loan.loan_date).toLocaleDateString()}</td>
+                <td>{new Date(loan.return_date).toLocaleDateString()}</td>
                 <td>{loan.status === 'returned' ? 'Devuelto' : 'Activo'}</td>
                 <td>
                   {loan.status === 'active' && (
                     <button
                       className="btn btn-warning btn-sm"
-                      onClick={() => handleReturn(loan._id, loan.book_id)}
+                      onClick={() => handleReturn(loan.id ?? loan._id, loan.book_id)}
+                      disabled={returningId === (loan.id ?? loan._id)}
                     >
-                      Devolver
+                      {returningId === (loan.id ?? loan._id) ? 'Devolviendo…' : 'Devolver'}
                     </button>
                   )}
                 </td>
@@ -103,7 +115,6 @@ function MyLoans() {
           </tbody>
         </table>
       )}
-
       <button
         className="btn btn-secondary mt-3"
         onClick={() => navigate('/catalog')}
