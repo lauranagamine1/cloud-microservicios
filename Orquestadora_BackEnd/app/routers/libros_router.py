@@ -54,3 +54,17 @@ def crear_libro(libro: LibroNuevo, admin=Depends(require_admin)):
         return response.json()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/{id}", summary="Obtener un libro por id")
+def get_book(id: int, user=Depends(require_user)):
+    try:
+        # ← usa f-string para que el {id} sea sustituido
+        resp = requests.get(f"http://localhost:8000/books/{id}")
+        if resp.status_code == 404:
+            raise HTTPException(404, "Libro no encontrado")
+        resp.raise_for_status()
+        return resp.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, detail=str(e))
