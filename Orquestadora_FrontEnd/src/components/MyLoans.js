@@ -12,7 +12,7 @@ function MyLoans() {
 
   const fetchLoans = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/prestamos/activos/${user.id}`, {
+      const res = await axios.get(`http://localhost:9000/prestamos/activos/${user.id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -27,7 +27,7 @@ function MyLoans() {
 
   const handleReturn = async (loanId, bookId) => {
     try {
-      await axios.put('http://localhost:8000/prestamos/devolver', {
+      await axios.put('http://localhost:9000/prestamos/devolver', {
         loan_id: loanId,
         book_id: bookId
       }, {
